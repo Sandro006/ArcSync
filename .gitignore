@@ -1,0 +1,55 @@
+# ============ PROJET-STANDARD (Ant + Tomcat 9 + Oracle 11g) ============
+# Garde : sources EJB/WAR, build-file/lib/*.jar, scripts build-*.xml,
+#         SQL AAAA-MM-JJ-HH_MM-*.sql, docs. Ignore : genere + secrets + local.
+
+# --- Build Ant (genere, ~2 min via ant -f build-tomcat.xml deploy) ---
+build-file/arbiochem_war/
+build-file/arbiochem_jar/
+build-file/ear/
+deployments/
+*.war
+# NE PAS ignorer build-file/lib/*.jar : dependances sans Maven (apj-core, ojdbc6...)
+
+# --- Interdits par control/pre-commit (le commit serait bloque) ---
+**/dateBuild.txt
+**/apj.properties
+# Copie locale : arbiochem-ejb/src/java/apj.properties (url/user/pass Oracle)
+
+# --- Secrets & config locale ---
+**/testdoudou.txt
+*.jks
+*.p12
+.env
+
+# --- Compiles / packages ---
+*.class
+*.ear
+
+# --- IDE ---
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+nbproject/
+.settings/
+.classpath
+.project
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Python (google-adk) ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# --- Temp ---
+checkbc/
+C_Temp/

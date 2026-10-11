@@ -1,0 +1,6 @@
+# Copier vers apj.properties (jamais commite, voir .gitignore + control/pre-commit)
+# et adapter a votre Oracle local :
+apj.connection.url=jdbc:oracle:thin:@localhost:1521:EE
+apj.connection.user=itu
+apj.connection.password=labs
+apj.debug=true
