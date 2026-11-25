@@ -1,19 +1,43 @@
-# ============ PROJET-STANDARD (Ant + Tomcat 9 + Oracle 11g) ============
-# Garde : sources EJB/WAR, build-file/lib/*.jar, scripts build-*.xml,
-#         SQL AAAA-MM-JJ-HH_MM-*.sql, docs. Ignore : genere + secrets + local.
+# ============================================================
+# .gitignore - Projet Standard (Ant + Tomcat 9 + Oracle 11g)
+# ============================================================
+# GARDE sous Git :
+#   - arbiochem-war/src/**  et  arbiochem-war/web/**
+#   - arbiochem-ejb/src/**  et  arbiochem-ejb/test/**
+#   - build-file/lib/*.jar deja committes (dependances Ant, pas de Maven)
+#   - scripts build*.xml, SQL AAAA-MM-JJ-HH_MM-*.sql, docs
+# IGNORE : genere, archives redondantes, secrets, local, IDE, OS.
 
-# --- Build Ant (genere, ~2 min via ant -f build-tomcat.xml deploy) ---
+# --- Gros fichiers redondants (le vrai poids du repo) ---
+# lib.zip = 107 Mo, les memes .jar sont deja presents un par un
+# et aucun script de build ne reference cette archive.
+build-file/lib/lib.zip
+*.zip
+*.psd
+
+# --- Nouvelles dependances jar locales ---
+# Les .jar deja committes restent suivis, mais on n'ajoute plus les
+# 42 jars locaux (74 Mo) qui n'ont jamais ete committes.
+# Pour forcer l'ajout d'un vrai nouveau jar : git add -f build-file/lib/mon.jar
+build-file/lib/*.jar
+
+# --- Genere par Ant / deploiement ---
 build-file/arbiochem_war/
 build-file/arbiochem_jar/
 build-file/ear/
+build-file/dist/
+build-file/build/
 deployments/
+**/WEB-INF/classes/
+**/target/
+**/out/
 *.war
-# NE PAS ignorer build-file/lib/*.jar : dependances sans Maven (apj-core, ojdbc6...)
+*.ear
+*.class
 
 # --- Interdits par control/pre-commit (le commit serait bloque) ---
 **/dateBuild.txt
 **/apj.properties
-# Copie locale : arbiochem-ejb/src/java/apj.properties (url/user/pass Oracle)
 
 # --- Secrets & config locale ---
 **/testdoudou.txt
@@ -21,13 +45,11 @@ deployments/
 *.p12
 .env
 
-# --- Compiles / packages ---
-*.class
-*.ear
-
 # --- IDE ---
 .idea/
 *.iml
+*.ipr
+*.iws
 .vscode/
 *.code-workspace
 nbproject/
@@ -37,19 +59,24 @@ nbproject/
 
 # --- OS ---
 .DS_Store
+._*
 Thumbs.db
 desktop.ini
 
-# --- Logs ---
+# --- Logs & temporaires ---
 *.log
 logs/
+checkbc/
+C_Temp/
+*.tmp
+*.bak
+*.orig
+*.rej
+*~
+~$*
 
 # --- Python (google-adk) ---
 __pycache__/
 *.pyc
 .venv/
 venv/
-
-# --- Temp ---
-checkbc/
-C_Temp/

@@ -1,0 +1,135 @@
+-- =====================================================================
+-- Module Cinema - sequences et fonctions de cle primaire
+--
+-- Chaque classe metier appelle preparePk(prefixe, fonction) puis
+-- makePK(Connection) -> Utilitaire.getMaxSeq(fonction, c) qui execute
+--     SELECT <fonction> FROM DUAL
+-- La fonction doit donc retourner un NUMBER.
+--
+-- Idempotent : sequences creees si absentes, fonctions recreees.
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- 1. Sequences
+-- ---------------------------------------------------------------------
+DECLARE
+    TYPE t_seq IS TABLE OF VARCHAR2(60);
+    v_seq t_seq := t_seq(
+        'SEQ_CINEMA_GENRE',
+        'SEQ_CINEMA_CATEGORIEPLACE',
+        'SEQ_CINEMA_FILM',
+        'SEQ_CINEMA_SALLE',
+        'SEQ_CINEMA_PLACE',
+        'SEQ_CINEMA_PROJECTION',
+        'SEQ_CINEMA_PROJECTIONTARIF',
+        'SEQ_CINEMA_RESERVATION',
+        'SEQ_CINEMA_RESERVATIONDETAIL',
+        'SEQ_CINEMA_ACHATBILLET',
+        'SEQ_CINEMA_BILLET'
+    );
+    v_exists NUMBER;
+BEGIN
+    FOR i IN v_seq.FIRST .. v_seq.LAST LOOP
+        SELECT COUNT(*) INTO v_exists
+          FROM user_sequences
+         WHERE sequence_name = v_seq(i);
+        IF v_exists = 0 THEN
+            EXECUTE IMMEDIATE 'CREATE SEQUENCE ' || v_seq(i)
+                || ' START WITH 1 INCREMENT BY 1 NOCACHE';
+        END IF;
+    END LOOP;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- 2. Fonctions GETSEQ...
+-- ---------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION GETSEQCINEMAGENRE RETURN NUMBER IS
+    v NUMBER;
+BEGIN
+    SELECT SEQ_CINEMA_GENRE.NEXTVAL INTO v FROM DUAL;
+    RETURN v;
+END;
+/
+
+CREATE OR REPLACE FUNCTION GETSEQCINEMACATEGORIEPLACE RETURN NUMBER IS
+    v NUMBER;
+BEGIN
+    SELECT SEQ_CINEMA_CATEGORIEPLACE.NEXTVAL INTO v FROM DUAL;
+    RETURN v;
+END;
+/
+
+CREATE OR REPLACE FUNCTION GETSEQCINEMAFILM RETURN NUMBER IS
+    v NUMBER;
+BEGIN
+    SELECT SEQ_CINEMA_FILM.NEXTVAL INTO v FROM DUAL;
+    RETURN v;
+END;
+/
+
+CREATE OR REPLACE FUNCTION GETSEQCINEMASALLE RETURN NUMBER IS
+    v NUMBER;
+BEGIN
+    SELECT SEQ_CINEMA_SALLE.NEXTVAL INTO v FROM DUAL;
+    RETURN v;
+END;
+/
+
+CREATE OR REPLACE FUNCTION GETSEQCINEMAPLACE RETURN NUMBER IS
+    v NUMBER;
+BEGIN
+    SELECT SEQ_CINEMA_PLACE.NEXTVAL INTO v FROM DUAL;
+    RETURN v;
+END;
+/
+
+CREATE OR REPLACE FUNCTION GETSEQCINEMAPROJECTION RETURN NUMBER IS
+    v NUMBER;
+BEGIN
+    SELECT SEQ_CINEMA_PROJECTION.NEXTVAL INTO v FROM DUAL;
+    RETURN v;
+END;
+/
+
+CREATE OR REPLACE FUNCTION GETSEQCINEMAPROJECTIONTARIF RETURN NUMBER IS
+    v NUMBER;
+BEGIN
+    SELECT SEQ_CINEMA_PROJECTIONTARIF.NEXTVAL INTO v FROM DUAL;
+    RETURN v;
+END;
+/
+
+CREATE OR REPLACE FUNCTION GETSEQCINEMARESERVATION RETURN NUMBER IS
+    v NUMBER;
+BEGIN
+    SELECT SEQ_CINEMA_RESERVATION.NEXTVAL INTO v FROM DUAL;
+    RETURN v;
+END;
+/
+
+CREATE OR REPLACE FUNCTION GETSEQCINEMARESERVATIONDETAIL RETURN NUMBER IS
+    v NUMBER;
+BEGIN
+    SELECT SEQ_CINEMA_RESERVATIONDETAIL.NEXTVAL INTO v FROM DUAL;
+    RETURN v;
+END;
+/
+
+CREATE OR REPLACE FUNCTION GETSEQCINEMAACHATBILLET RETURN NUMBER IS
+    v NUMBER;
+BEGIN
+    SELECT SEQ_CINEMA_ACHATBILLET.NEXTVAL INTO v FROM DUAL;
+    RETURN v;
+END;
+/
+
+CREATE OR REPLACE FUNCTION GETSEQCINEMABILLET RETURN NUMBER IS
+    v NUMBER;
+BEGIN
+    SELECT SEQ_CINEMA_BILLET.NEXTVAL INTO v FROM DUAL;
+    RETURN v;
+END;
+/
+
+COMMIT;
