@@ -55,6 +55,7 @@
     String idProjection = "";
     String idClient = "";
     double total = 0;
+    double remiseTotale = 0;
     double acompte = 0;
 %>
 <div class="content-wrapper">
@@ -82,6 +83,16 @@
             idClient = cinS(rs.getString("IDCLIENT"));
             total = rs.getDouble("MONTANTTOTALLIB");
             acompte = rs.getDouble("MONTANTACOMPTE");
+
+            PreparedStatement psRemise = c.prepareStatement(
+                    "SELECT NVL(SUM(MONTANTREMISE), 0) FROM CINEMA_RESERVATIONDETAIL"
+                    + " WHERE IDMERE = ? AND ETAT IN (1, 11)");
+            psRemise.setString(1, id);
+            ResultSet rsRemise = psRemise.executeQuery();
+            if (rsRemise.next()) {
+                remiseTotale = rsRemise.getDouble(1);
+            }
+            cinClose(rsRemise, psRemise, null);
 %>
     <div class="cardradius" style="padding:16px">
         <h3>
@@ -95,6 +106,7 @@
             <tr><th>Projection</th><td><%=cinH(idProjection)%></td></tr>
             <tr><th>Places</th><td><%= rs.getInt("NBPLACESLIB") %></td></tr>
             <tr><th>Montant total</th><td><b><%=cinMoney(total)%> Ar</b></td></tr>
+            <tr><th>Remise</th><td><% if (remiseTotale > 0) { %>-<%=cinMoney(remiseTotale)%> Ar<% } else { %>&mdash;<% } %></td></tr>
             <tr><th>Acompte</th><td><%=cinMoney(acompte)%> Ar</td></tr>
             <tr><th>Reste &agrave; payer</th><td><%=cinMoney(rs.getDouble("RESTEAPAYERLIB"))%> Ar</td></tr>
             <tr><th>Expiration</th><td><%=cinTsFmt(rs.getTimestamp("DATEEXPIRATION"))%></td></tr>
@@ -140,21 +152,32 @@
 <div class="cardradius" style="padding:16px;margin-top:16px">
     <h4>Places r&eacute;serv&eacute;es</h4>
     <table class="table table-bordered">
-        <tr><th>Place</th><th>Cat&eacute;gorie</th><th>Prix</th><th>Billet</th><th>&Eacute;tat</th></tr>
+        <tr><th>Place</th><th>Cat&eacute;gorie</th><th>Prix</th><th>Remise</th><th>Billet</th><th>&Eacute;tat</th></tr>
 <%
     try {
         ps = c.prepareStatement(
-                "SELECT * FROM CINEMA_RESERVATIONDETAIL_LIB WHERE IDMERE = ? ORDER BY ID");
+                "SELECT d.*, l.IDPLACELIB, l.IDCATEGORIEPLACELIB, l.IDBILLETLIB, l.ETATLIB"
+                + " FROM CINEMA_RESERVATIONDETAIL d"
+                + " JOIN CINEMA_RESERVATIONDETAIL_LIB l ON l.ID = d.ID"
+                + " WHERE d.IDMERE = ? ORDER BY d.ID");
         ps.setString(1, id);
         rs = ps.executeQuery();
         boolean any = false;
         while (rs.next()) {
             any = true;
+            double montantRemiseLigne = rs.getDouble("MONTANTREMISE");
+            double prixLigne = rs.getDouble("PRIX");
 %>
         <tr>
             <td><%=cinH(rs.getString("IDPLACELIB"))%></td>
             <td><%=cinH(rs.getString("IDCATEGORIEPLACELIB"))%></td>
-            <td><%=cinMoney(rs.getDouble("PRIX"))%> Ar</td>
+            <td>
+                <% if (montantRemiseLigne > 0) { %>
+                <s><%=cinMoney(prixLigne + montantRemiseLigne)%></s>
+                <% } %>
+                <%=cinMoney(prixLigne)%> Ar
+            </td>
+            <td><% if (montantRemiseLigne > 0) { %>-<%=cinMoney(montantRemiseLigne)%> Ar<% } else { %>&mdash;<% } %></td>
             <td><%=cinH(rs.getString("IDBILLETLIB"))%></td>
             <td><%=cinH(rs.getString("ETATLIB"))%></td>
         </tr>
@@ -162,7 +185,7 @@
         }
         if (!any) {
 %>
-        <tr><td colspan="5">Aucune place.</td></tr>
+        <tr><td colspan="6">Aucune place.</td></tr>
 <%
         }
     } catch (Exception e) {

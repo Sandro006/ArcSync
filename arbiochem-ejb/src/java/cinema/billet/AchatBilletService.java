@@ -24,6 +24,12 @@ public class AchatBilletService {
         public String idPlace;
         public String idCategoriePlace;
         public double prix;
+        /**
+         * Vrai si {@code prix} est deja fige et ne doit pas etre recalcule.
+         * Utilise pour la conversion d'une reservation remisee, dont le prix
+         * net peut legitimement valoir 0.
+         */
+        public boolean prixFixe;
 
         public LigneBillet() {
         }
@@ -32,6 +38,12 @@ public class AchatBilletService {
             this.idPlace = idPlace;
             this.idCategoriePlace = idCategoriePlace;
             this.prix = prix;
+        }
+
+        public LigneBillet(String idPlace, String idCategoriePlace, double prix,
+                boolean prixFixe) {
+            this(idPlace, idCategoriePlace, prix);
+            this.prixFixe = prixFixe;
         }
     }
 
@@ -134,8 +146,12 @@ public class AchatBilletService {
 
         Billet[] filles = new Billet[billets.size()];
         double total = 0;
+        boolean prixFige = false;
         for (int i = 0; i < billets.size(); i++) {
             LigneBillet lb = billets.get(i);
+            if (lb.prixFixe) {
+                prixFige = true;
+            }
             Billet b = new Billet();
             b.setIdPlace(lb.idPlace);
             String categorie = lb.idCategoriePlace;
@@ -145,7 +161,7 @@ public class AchatBilletService {
             }
             b.setIdCategoriePlace(categorie);
             double prix = lb.prix;
-            if (prix <= 0) {
+            if (!lb.prixFixe && prix <= 0) {
                 prix = ProjectionService.getPrixPlace(idProjection, lb.idPlace, c);
             }
             b.setPrix(prix);
@@ -156,6 +172,7 @@ public class AchatBilletService {
         }
         achat.setFille(filles);
         achat.setMontantTotal(total);
+        achat.setPrixFige(prixFige);
         double paye = (montantPaye < 0) ? total : montantPaye;
         achat.setMontantPaye(paye);
         achat.setMonnaieRendue(paye - total > 0 ? paye - total : 0);

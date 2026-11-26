@@ -35,6 +35,7 @@ public class ReservationService {
     public static class Resultat {
         public String idReservation;
         public double montantTotal;
+        public double montantRemise;
         public double acompte;
         public Timestamp dateExpiration;
         public List<String> idDetails = new ArrayList<String>();
@@ -117,11 +118,17 @@ public class ReservationService {
         }
         r.setFille(details);
 
+        // Regles de remise configurees (CINEMA_REMISE). Une seule regle au plus
+        // est appliquee a la reservation.
+        double montantRemise = RemiseService.appliquer(details, c);
+        r.setMontantRemise(montantRemise);
+
         Reservation cree = (Reservation) r.createObject(u, c);
         Resultat res = new Resultat();
         res.idReservation = (cree != null && cree.getId() != null) ? cree.getId() : r.getId();
         res.montantTotal = r.getMontantTotal();
         res.acompte = acompte;
+        res.montantRemise = montantRemise;
         res.dateExpiration = r.getDateExpiration();
         for (int i = 0; i < details.length; i++) {
             res.idDetails.add(details[i].getId());
@@ -257,8 +264,10 @@ public class ReservationService {
         List<AchatBilletService.LigneBillet> lignes =
                 new ArrayList<AchatBilletService.LigneBillet>();
         for (int i = 0; i < details.length; i++) {
+            // Prix deja fige a la creation (remise eventuelle incluse) : ne pas
+            // le recalculer, meme s'il vaut 0 apres une remise de 100 %.
             lignes.add(new AchatBilletService.LigneBillet(details[i].getIdPlace(),
-                    details[i].getIdCategoriePlace(), details[i].getPrix()));
+                    details[i].getIdCategoriePlace(), details[i].getPrix(), true));
         }
 
         AchatBilletService.Resultat achat = AchatBilletService.acheter(c, u,

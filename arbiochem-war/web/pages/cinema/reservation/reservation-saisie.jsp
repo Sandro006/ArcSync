@@ -58,7 +58,9 @@
                         idClient, idProjection, lignes, cinD(acompteP),
                         cinTs(expirationP), remarque);
                 String msg = "Reservation " + r.idReservation + " creee ("
-                        + lignes.size() + " place(s), total " + r.montantTotal + " Ar).";
+                        + lignes.size() + " place(s), total " + r.montantTotal + " Ar"
+                        + (r.montantRemise > 0 ? ", remise " + r.montantRemise + " Ar" : "")
+                        + ").";
                 response.sendRedirect(lien
                         + "?but=cinema/reservation/reservation-fiche.jsp&id="
                         + java.net.URLEncoder.encode(r.idReservation, "UTF-8")

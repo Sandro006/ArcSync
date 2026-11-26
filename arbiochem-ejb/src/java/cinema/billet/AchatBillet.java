@@ -27,6 +27,12 @@ public class AchatBillet extends ClassMere {
     private String idMouvementCaisse;
     private String remarque;
     private int etat = ConstanteCinema.ETAT_CREER;
+    /**
+     * Prix des billets deja figes (conversion d'une reservation, remise
+     * incluse). Champ non persiste : il sert uniquement aux controles de
+     * creation, un prix net nul etant alors legitime.
+     */
+    private boolean prixFige;
 
     public AchatBillet() throws Exception {
         super.setNomTable("CINEMA_ACHATBILLET");
@@ -110,7 +116,7 @@ public class AchatBillet extends ClassMere {
             if (occupee > 0) {
                 throw new Exception("La place " + b.getIdPlace() + " est deja occupee.");
             }
-            if (b.getPrix() <= 0) {
+            if (!prixFige && b.getPrix() <= 0) {
                 b.setPrix(ProjectionService.getPrixPlace(idProjection, b.getIdPlace(), c));
             }
             b.setStatut(ConstanteCinema.STATUT_BILLET_VENDU);
@@ -315,5 +321,13 @@ public class AchatBillet extends ClassMere {
 
     public void setEtat(int etat) {
         this.etat = etat;
+    }
+
+    public boolean isPrixFige() {
+        return prixFige;
+    }
+
+    public void setPrixFige(boolean prixFige) {
+        this.prixFige = prixFige;
     }
 }

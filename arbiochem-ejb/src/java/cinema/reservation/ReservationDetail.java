@@ -16,6 +16,8 @@ public class ReservationDetail extends ClassFille {
     private String idCategoriePlace;
     private double prix;
     private String idBillet;
+    private String idRemise;
+    private double montantRemise;
     private int etat = ConstanteCinema.ETAT_CREER;
 
     public ReservationDetail() throws Exception {
@@ -128,6 +130,29 @@ public class ReservationDetail extends ClassFille {
 
     public void setIdBillet(String idBillet) {
         this.idBillet = idBillet;
+    }
+
+    /**
+     * Prix avant remise (prix net + montant remise).
+     */
+    public double getPrixBrut() {
+        return prix + montantRemise;
+    }
+
+    public String getIdRemise() {
+        return idRemise;
+    }
+
+    public void setIdRemise(String idRemise) {
+        this.idRemise = idRemise;
+    }
+
+    public double getMontantRemise() {
+        return montantRemise;
+    }
+
+    public void setMontantRemise(double montantRemise) {
+        this.montantRemise = montantRemise;
     }
 
     public int getEtat() {

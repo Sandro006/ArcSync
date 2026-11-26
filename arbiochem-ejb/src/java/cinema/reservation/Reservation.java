@@ -21,6 +21,7 @@ public class Reservation extends ClassMere {
     private String idProjection;
     private Timestamp dateExpiration;
     private double montantAcompte;
+    private double montantRemise;
     private int statut = ConstanteCinema.STATUT_RESERVATION_EN_ATTENTE;
     private String remarque;
     private int etat = ConstanteCinema.ETAT_CREER;
@@ -111,7 +112,7 @@ public class Reservation extends ClassMere {
             if (occupee > 0) {
                 throw new Exception("La place " + d.getIdPlace() + " est deja occupee.");
             }
-            if (d.getPrix() <= 0) {
+            if (d.getPrix() <= 0 && !aUneRemise(d)) {
                 d.setPrix(ProjectionService.getPrixPlace(idProjection, d.getIdPlace(), c));
             }
             d.setEtat(ConstanteCinema.ETAT_CREER);
@@ -130,6 +131,11 @@ public class Reservation extends ClassMere {
 
     public boolean estExpiree() {
         return dateExpiration != null && dateExpiration.before(CinemaDb.now());
+    }
+
+    /** Vrai si la ligne a deja recu une remise (prix net eventuellement nul). */
+    private boolean aUneRemise(ReservationDetail d) {
+        return d.getIdRemise() != null && !d.getIdRemise().trim().isEmpty();
     }
 
     public boolean estActive() {
@@ -246,6 +252,14 @@ public class Reservation extends ClassMere {
 
     public void setMontantAcompte(double montantAcompte) {
         this.montantAcompte = montantAcompte;
+    }
+
+    public double getMontantRemise() {
+        return montantRemise;
+    }
+
+    public void setMontantRemise(double montantRemise) {
+        this.montantRemise = montantRemise;
     }
 
     public int getStatut() {
